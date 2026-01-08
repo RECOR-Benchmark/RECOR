@@ -16,8 +16,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/RECOR-Benchmark/RECOR",
-    packages=find_packages(where="src"),
-    package_dir={"": "src"},
+    packages=find_packages(include=["experiments*", "pipeline*"]),
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Science/Research",
@@ -60,9 +59,9 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "recor-retrieve=src.retrieval.retrievers:main",
-            "recor-generate=src.generation.rag_pipeline:main",
-            "recor-evaluate=src.evaluation.llm_judge:main",
+            "recor-retrieve=experiments.retrieval.run_retrieval:main",
+            "recor-generate=experiments.generation.generate_and_evaluate:main",
+            "recor-evaluate=experiments.generation.llm_judge:main",
         ],
     },
 )

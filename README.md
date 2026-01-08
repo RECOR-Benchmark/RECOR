@@ -129,7 +129,7 @@ data/
 ### Retrieval
 
 ```bash
-python -m src.retrieval.retrievers \
+python -m experiments.retrieval.run_retrieval \
     --model bge-large-en-v1.5 \
     --data-dir ./data \
     --output-dir ./results
@@ -139,18 +139,18 @@ python -m src.retrieval.retrievers \
 
 ```bash
 # Query + Conversation History
-python -m src.retrieval.ablation_eval \
+python -m experiments.retrieval.ablation_eval \
     --model bge --append-history
 
 # Query + Reasoning + Metadata
-python -m src.retrieval.ablation_eval \
+python -m experiments.retrieval.ablation_eval \
     --model bge --append-reasoning --append-reasoning-metadata
 ```
 
 ### RAG Generation + Evaluation
 
 ```bash
-python -m src.generation.generate_and_evaluate \
+python -m experiments.generation.generate_and_evaluate \
     --retrieval-cache ./results/bge \
     --generators "vllm:Qwen/Qwen2.5-14B-Instruct" \
     --output-dir ./rag_results
@@ -159,7 +159,7 @@ python -m src.generation.generate_and_evaluate \
 ### LLM-as-Judge Evaluation
 
 ```bash
-python -m src.evaluation.llm_judge \
+python -m experiments.generation.llm_judge \
     --input ./rag_results \
     --output ./judge_results
 ```
@@ -176,22 +176,22 @@ python -m src.evaluation.llm_judge \
 
 ```
 RECOR/
-├── src/
-│   ├── retrieval/                     # Retrieval experiments
-│   │   ├── retrievers.py              # BGE, BM25, E5, Contriever, DIVER, etc.
-│   │   ├── run_retrieval.py           # Run retrieval evaluation
-│   │   └── ablation_eval.py           # Test: +history, +reasoning, +metadata
+├── experiments/                       # Run experiments on RECOR benchmark
 │   │
-│   ├── generation/                    # RAG generation
-│   │   └── generate_and_evaluate.py   # Generate answers + ROUGE/METEOR/BERTScore
+│   ├── retrieval/                     # RETRIEVAL evaluation → Recall, MRR, nDCG
+│   │   ├── retrievers.py              # Model implementations (BGE, BM25, E5, Contriever, DIVER)
+│   │   ├── run_retrieval.py           # Run retrieval, compute metrics
+│   │   ├── ablation_eval.py           # Ablation: +history, +reasoning, +metadata
+│   │   └── evaluate_last_turn.py      # Evaluate with previous turn context
 │   │
-│   ├── evaluation/                    # Quality evaluation
-│   │   ├── quality_analysis.py        # Evaluate benchmark quality (4 dimensions)
-│   │   └── llm_judge.py               # GPT-4 judge (5 metrics, 1-10 scale)
-│   │
-│   └── pipeline/                      # Dataset generation pipeline
-│       ├── generate_bright.py         # Generate BRIGHT domain conversations
-│       └── generate_stackexchange.py  # Generate StackExchange conversations
+│   └── generation/                    # GENERATION evaluation → ROUGE, BERTScore, LLM-judge
+│       ├── generate_and_evaluate.py   # Generate RAG answers + automatic metrics
+│       └── llm_judge.py               # GPT-4 judge (5 dimensions, 1-10 scale)
+│
+├── pipeline/                          # Benchmark creation (for maintainers)
+│   ├── generate_bright.py             # Generate BRIGHT domain conversations
+│   ├── generate_stackexchange.py      # Generate StackExchange conversations
+│   └── quality_analysis.py            # Validate benchmark quality (4 dimensions)
 │
 ├── assets/
 │   └── pipeline.png                   # Dataset generation pipeline diagram
