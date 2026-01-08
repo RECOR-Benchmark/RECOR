@@ -80,7 +80,7 @@ class Config:
     # Azure OpenAI Configuration (set via environment variables)
     azure_endpoint: str = ""
     azure_api_key: str = ""
-    azure_api_version: str = "2024-02-15-preview"
+    azure_api_version: str = ""
 
     # Together AI Configuration
     together_api_key: str = ""
