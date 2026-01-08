@@ -13,7 +13,7 @@ import argparse
 import json
 from pathlib import Path
 from tqdm import tqdm
-from retrievers import RETRIEVAL_FUNCS, calculate_retrieval_metrics
+from .retrievers import RETRIEVAL_FUNCS, calculate_retrieval_metrics
 
 def load_corpus_from_json(queries_dir, domain):
     """Load all documents from positive and negative JSON files"""

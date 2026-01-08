@@ -107,7 +107,7 @@ Visit [HuggingFace Files](https://huggingface.co/datasets/RECOR-Benchmark/RECOR/
 
 ```
 data/
-├── benchmark/
+├── benchmark/                              # Conversational benchmark
 │   ├── Drones_benchmark.jsonl
 │   ├── biology_benchmark.jsonl
 │   ├── earth_science_benchmark.jsonl
@@ -119,9 +119,15 @@ data/
 │   ├── psychology_benchmark.jsonl
 │   ├── robotics_benchmark.jsonl
 │   └── sustainable_living_benchmark.jsonl
-└── corpus/
-    ├── {domain}_positive_documents.jsonl
-    └── {domain}_negative_documents.jsonl
+├── corpus/                                 # Document corpus
+│   ├── {domain}_positive_documents.jsonl
+│   └── {domain}_negative_documents.jsonl
+└── raw/                                    # Original StackExchange QA (5 domains)
+    ├── Drones.json
+    ├── hardware.json
+    ├── law.json
+    ├── medicalsciences.json
+    └── politics.json
 ```
 
 ## Usage
