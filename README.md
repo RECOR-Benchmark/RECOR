@@ -9,6 +9,10 @@ A benchmark for evaluating reasoning-intensive conversational information retrie
 
 RECOR addresses the gap between traditional conversational search evaluation and the complex reasoning requirements of real-world information-seeking scenarios.
 
+### Pipeline
+
+![RECOR Pipeline](assets/pipeline.png)
+
 ### Statistics
 
 | Metric | Value |
@@ -35,13 +39,32 @@ pip install -r requirements.txt
 
 ## Dataset
 
-### Download from HuggingFace
+### Download
+
+**Option 1: Python (Recommended)**
 
 ```python
 from datasets import load_dataset
 
-dataset = load_dataset("RECOR-Benchmark/RECOR")
+# Load specific subset and domain
+benchmark = load_dataset("RECOR-Benchmark/RECOR", "benchmark", split="biology")
+corpus_pos = load_dataset("RECOR-Benchmark/RECOR", "corpus_positive", split="biology")
+corpus_neg = load_dataset("RECOR-Benchmark/RECOR", "corpus_negative", split="biology")
+
+# Available domains: biology, earth_science, economics, psychology, robotics,
+#                    sustainable_living, Drones, hardware, law, medicalsciences, politics
 ```
+
+**Option 2: Command Line**
+
+```bash
+# Download entire dataset to local folder
+huggingface-cli download RECOR-Benchmark/RECOR --repo-type dataset --local-dir ./RECOR-data
+```
+
+**Option 3: Browse & Download Files**
+
+Visit [HuggingFace Files](https://huggingface.co/datasets/RECOR-Benchmark/RECOR/tree/main/data) to browse and download individual files.
 
 ### Data Format
 
@@ -154,20 +177,24 @@ python -m src.evaluation.llm_judge \
 ```
 RECOR/
 ├── src/
-│   ├── retrieval/
-│   │   ├── retrievers.py              # Dense/sparse retrieval implementations
-│   │   ├── run_retrieval.py           # Run retrieval on filtered queries
-│   │   └── ablation_eval.py           # Query augmentation ablation (§5.1)
-│   ├── generation/
-│   │   └── generate_and_evaluate.py   # RAG + automatic metrics (§5.2)
-│   ├── evaluation/
-│   │   ├── quality_analysis.py        # Benchmark quality analysis (§4.2)
-│   │   └── llm_judge.py               # LLM-as-judge evaluation (§5.2)
-│   └── pipeline/
-│       ├── generate_bright.py         # BRIGHT domain generation
-│       └── generate_stackexchange.py  # StackExchange generation
-├── scripts/
-│   └── prepare_dataset.py
+│   ├── retrieval/                     # Retrieval experiments
+│   │   ├── retrievers.py              # BGE, BM25, E5, Contriever, DIVER, etc.
+│   │   ├── run_retrieval.py           # Run retrieval evaluation
+│   │   └── ablation_eval.py           # Test: +history, +reasoning, +metadata
+│   │
+│   ├── generation/                    # RAG generation
+│   │   └── generate_and_evaluate.py   # Generate answers + ROUGE/METEOR/BERTScore
+│   │
+│   ├── evaluation/                    # Quality evaluation
+│   │   ├── quality_analysis.py        # Evaluate benchmark quality (4 dimensions)
+│   │   └── llm_judge.py               # GPT-4 judge (5 metrics, 1-10 scale)
+│   │
+│   └── pipeline/                      # Dataset generation pipeline
+│       ├── generate_bright.py         # Generate BRIGHT domain conversations
+│       └── generate_stackexchange.py  # Generate StackExchange conversations
+│
+├── assets/
+│   └── pipeline.png                   # Dataset generation pipeline diagram
 ├── requirements.txt
 └── README.md
 ```
