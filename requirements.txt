@@ -22,6 +22,7 @@ openai>=1.0.0
 rouge-score>=0.1.2
 bert-score>=0.3.12
 nltk>=3.8.0
+pytrec_eval>=0.5
 
 # HuggingFace datasets
 datasets>=2.14.0

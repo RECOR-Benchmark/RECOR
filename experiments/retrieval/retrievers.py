@@ -529,6 +529,29 @@ def get_embedding_openai_azure(texts, azure_client, tokenizer, model="text-embed
     
     return all_embeddings
 
+
+def get_embedding_openai(texts, openai_client, tokenizer, model="text-embedding-3-large", max_retries=3):
+    """Get embeddings from OpenAI API"""
+    all_embeddings = []
+    texts = [text if text.strip() else " " for text in texts]
+
+    for attempt in range(max_retries):
+        try:
+            response = openai_client.embeddings.create(
+                input=texts,
+                model=model
+            )
+            return [item.embedding for item in response.data]
+        except Exception as e:
+            if attempt < max_retries - 1:
+                print(f"Attempt {attempt + 1} failed: {e}. Retrying...")
+                time.sleep(2 ** attempt)
+            else:
+                print(f"Failed after {max_retries} attempts: {e}")
+                raise
+    return all_embeddings
+
+
 def retrieval_openai_azure(queries, query_ids, documents, doc_ids, task, model_id, cache_dir, excluded_ids, long_context, **kwargs):
     tokenizer = tiktoken.get_encoding("cl100k_base")
     
@@ -1477,15 +1500,6 @@ def retrieval_reasonir(queries,query_ids,documents,doc_ids,task,instructions,mod
         if os.path.isfile(cur_cache_file):
             doc_emb = np.load(cur_cache_file, allow_pickle=True)
         elif ignore_cache:
-            inputs = tokenizer(
-                sentences_batch,
-                padding=True,
-                truncation=True,
-                return_tensors='pt',
-                max_length=max_length,
-                add_special_tokens=add_special_tokens,
-            ).to(self.device)
-            doc_emb = model(**inputs)[0]
             doc_emb = model.encode(documents, instruction=doc_instruction, batch_size=batch_size, max_length=doc_max_length)
         else:
             doc_emb = model.encode(documents, instruction=doc_instruction, batch_size=batch_size, max_length=doc_max_length)

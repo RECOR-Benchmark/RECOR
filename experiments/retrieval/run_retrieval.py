@@ -168,19 +168,21 @@ def evaluate_domain(domain, dataset_dir, args, config):
         'results': results
     }
 
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset_dir', type=str, required=True,
                         help='Path to dataset directory (contains corpus/, queries/, images/)')
     parser.add_argument('--domains', type=str, nargs='+',
-                        default=['academia', 'apple', 'askubuntu', 'aviation', 'bioacoustics', 'bioinformatics'],
+                        default=['biology', 'Drones', 'earth_science', 'economics',
+                                'hardware', 'law', 'medicalsciences', 'politics',
+                                'psychology', 'robotics', 'sustainable_living'],
                         help='List of domains to evaluate')
     parser.add_argument('--model_data_dir', type=str, required=True)
 
     parser.add_argument('--model', type=str, required=True,
                         choices=['bm25','cohere','e5','google','grit','inst-l','inst-xl',
                                  'openai','qwen','qwen2','sbert','sf','voyage','bge',
-                                 'bge_ce', 'nomic', 'm2', 'contriever', 'reasonir', 'rader', 'diver-retriever'])
+                                 'nomic', 'm2', 'contriever', 'reasonir', 'rader', 'diver-retriever'])
     parser.add_argument('--query_max_length', type=int, default=-1)
     parser.add_argument('--doc_max_length', type=int, default=-1)
     parser.add_argument('--encode_batch_size', type=int, default=-1)
@@ -256,3 +258,7 @@ if __name__ == '__main__':
         print(f"  - Aggregated summary: {args.output_dir}/summary.json")
     else:
         print("\nNo domains were successfully evaluated.")
+
+
+if __name__ == '__main__':
+    main()

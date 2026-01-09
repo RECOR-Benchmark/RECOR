@@ -136,9 +136,10 @@ data/
 
 ```bash
 python -m experiments.retrieval.run_retrieval \
-    --model bge-large-en-v1.5 \
-    --data-dir ./data \
-    --output-dir ./results
+    --model bge \
+    --dataset_dir ./data \
+    --model_data_dir queries \
+    --output_dir ./results
 ```
 
 ### Ablation Study (§5.1)

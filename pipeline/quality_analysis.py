@@ -460,9 +460,9 @@ class AzureClient:
     def __init__(self, config: Config):
         self.config = config
         self.client = AzureOpenAI(
-            azure_endpoint="",
-            api_key="",
-            api_version=""
+            azure_endpoint=config.azure_endpoint or os.environ.get("AZURE_OPENAI_ENDPOINT", ""),
+            api_key=config.azure_api_key or os.environ.get("AZURE_OPENAI_API_KEY", ""),
+            api_version=config.azure_api_version or os.environ.get("AZURE_OPENAI_API_VERSION", "2024-02-15-preview")
         )
         self.rate_limiter = RateLimiter(
             min_interval=config.min_request_interval,
@@ -480,7 +480,7 @@ class AzureClient:
                 self.rate_limiter.wait(worker_id)
 
                 response = self.client.chat.completions.create(
-                    model="gpt-4o-2",
+                    model=self.config.azure_deployment or os.environ.get("AZURE_OPENAI_DEPLOYMENT", "gpt-4o"),
                     messages=[
                         {"role": "system", "content": "You are an expert linguistic analyst. Always respond with valid JSON only."},
                         {"role": "user", "content": prompt}
@@ -1413,10 +1413,10 @@ Examples:
     )
 
     # Get Azure credentials
-    endpoint = ""
-    api_key = ""
-    deployment = ""
-    api_version = ""
+    endpoint = os.environ.get("AZURE_OPENAI_ENDPOINT", "")
+    api_key = os.environ.get("AZURE_OPENAI_API_KEY", "")
+    deployment = os.environ.get("AZURE_OPENAI_DEPLOYMENT", "")
+    api_version = os.environ.get("AZURE_OPENAI_API_VERSION", "")
 
     if not endpoint or not api_key:
         print("\n" + "="*60)

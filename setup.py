@@ -43,6 +43,7 @@ setup(
         "rouge-score>=0.1.2",
         "bert-score>=0.3.12",
         "nltk>=3.8.0",
+        "pytrec_eval>=0.5",
         "datasets>=2.14.0",
     ],
     extras_require={

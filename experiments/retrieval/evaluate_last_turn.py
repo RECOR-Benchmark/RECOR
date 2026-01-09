@@ -348,7 +348,7 @@ if __name__ == '__main__':
     parser.add_argument('--model', type=str, required=True,
                         choices=['bm25','cohere','e5','google','grit','inst-l','inst-xl',
                                  'openai','qwen','qwen2','sbert','sf','voyage','bge',
-                                 'bge_ce', 'nomic', 'm2', 'contriever', 'reasonir', 'rader', 'diver-retriever'])
+                                 'nomic', 'm2', 'contriever', 'reasonir', 'rader', 'diver-retriever'])
     parser.add_argument('--query_max_length', type=int, default=-1)
     parser.add_argument('--doc_max_length', type=int, default=-1)
     parser.add_argument('--encode_batch_size', type=int, default=-1)

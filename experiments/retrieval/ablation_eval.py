@@ -97,10 +97,10 @@ def evaluate_domain_conversational(domain, dataset_dir, args, config):
             # Identify which gold field is present
             if 'gold_doc_ids' in first_turn:
                 print(f"  Using field: 'gold_doc_ids'")
-            elif 'gold_ids' in first_turn:
-                print(f"  Using field: 'gold_ids'")
+            elif 'supporting_doc_ids' in first_turn:
+                print(f"  Using field: 'supporting_doc_ids'")
             else:
-                print(f"  WARNING: Neither 'gold_doc_ids' nor 'gold_ids' found!")
+                print(f"  WARNING: Neither 'gold_doc_ids' nor 'supporting_doc_ids' found!")
 
     # Prepare all queries from all turns (so model is loaded only once)
     all_queries = []
@@ -118,8 +118,8 @@ def evaluate_domain_conversational(domain, dataset_dir, args, config):
             # Handle both possible field names for gold documents
             if 'gold_doc_ids' in turn:
                 gold_ids = turn['gold_doc_ids']
-            elif 'gold_ids' in turn:
-                gold_ids = turn['gold_ids']
+            elif 'supporting_doc_ids' in turn:
+                gold_ids = turn['supporting_doc_ids']
             else:
                 gold_ids = []
 
@@ -288,8 +288,8 @@ def evaluate_domain_conversational(domain, dataset_dir, args, config):
             # Get gold doc IDs - handle both possible field names
             if 'gold_doc_ids' in turn:
                 gold_doc_ids = turn['gold_doc_ids']
-            elif 'gold_ids' in turn:
-                gold_doc_ids = turn['gold_ids']
+            elif 'supporting_doc_ids' in turn:
+                gold_doc_ids = turn['supporting_doc_ids']
             else:
                 gold_doc_ids = []
 
@@ -417,7 +417,7 @@ if __name__ == '__main__':
     parser.add_argument('--model', type=str, required=True,
                         choices=['bm25','cohere','e5','google','grit','inst-l','inst-xl',
                                  'openai','qwen','qwen2','sbert','sf','voyage','bge',
-                                 'bge_ce', 'nomic', 'm2', 'contriever', 'reasonir', 'rader', 'diver-retriever'])
+                                 'nomic', 'm2', 'contriever', 'reasonir', 'rader', 'diver-retriever'])
     parser.add_argument('--query_max_length', type=int, default=-1)
     parser.add_argument('--doc_max_length', type=int, default=-1)
     parser.add_argument('--encode_batch_size', type=int, default=-1)
