@@ -175,9 +175,8 @@ class DataLoader:
         source = "bright" if domain in self.config.bright_domains else "annotated"
 
         folder = Path(self.config.base_dir) / "data"
-        benchmark_file = folder / f"{domain}_benchmark.jsonl"
-        pos_file = folder / f"{domain}_positive_documents.jsonl"
-        neg_file = folder / f"{domain}_negative_documents.jsonl"
+        benchmark_file = folder / "benchmark" / f"{domain}_benchmark.jsonl"
+        corpus_file = folder / "corpus" / f"{domain}_documents.jsonl"
 
         if not folder.exists():
             logging.error(f"Data folder not found: {folder}")
@@ -185,13 +184,12 @@ class DataLoader:
 
         # Load documents
         documents = {}
-        for doc_file in [pos_file, neg_file]:
-            if doc_file.exists():
-                with open(doc_file, 'r', encoding='utf-8') as f:
-                    for line in f:
-                        if line.strip():
-                            d = json.loads(line)
-                            documents[d["doc_id"]] = Document(doc_id=d["doc_id"], content=d["content"])
+        if corpus_file.exists():
+            with open(corpus_file, 'r', encoding='utf-8') as f:
+                for line in f:
+                    if line.strip():
+                        d = json.loads(line)
+                        documents[d["doc_id"]] = Document(doc_id=d["doc_id"], content=d["content"])
 
         # Load turns
         turns = []

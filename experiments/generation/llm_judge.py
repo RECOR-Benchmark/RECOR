@@ -18,15 +18,16 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 # CONFIGURATION - Set these paths for your environment
 # =====================================================
 
-# Base directory containing benchmark and generation results
-BASE_DIR = Path(os.getenv("RECOR_DATA_DIR", "./data"))
+# Base directory containing data folder
+BASE_DIR = Path(os.getenv("RECOR_DATA_DIR", "."))
 
 # Gen results directory
 GEN_RESULTS_DIR = Path(os.getenv("RECOR_GEN_RESULTS", BASE_DIR / "gen_results"))
 
-# Domain data folders
-BRIGHT_DATA_DIR = BASE_DIR / "benchmark"
-ANNOTATED_DATA_DIR = BASE_DIR / "benchmark"
+# Domain data folders (inside data/ subdirectory)
+DATA_DIR = BASE_DIR / "data"
+BENCHMARK_DIR = DATA_DIR / "benchmark"
+CORPUS_DIR = DATA_DIR / "corpus"
 
 # Domain classification
 BRIGHT_DOMAINS = ["biology", "earth_science", "economics", "psychology", "robotics", "sustainable_living"]
@@ -78,42 +79,21 @@ def get_deployment_name():
 # =====================================================
 
 def load_documents_for_domain(domain: str) -> Dict[str, str]:
-    """Load all documents (positive + negative) for a domain."""
+    """Load all documents for a domain."""
     documents = {}
 
-    # Determine which folder based on domain
-    if domain in BRIGHT_DOMAINS:
-        folder = BRIGHT_DATA_DIR
-        pos_file = folder / f"{domain}_positive_documents.jsonl"
-        neg_file = folder / f"{domain}_negative_documents.jsonl"
-    else:
-        folder = ANNOTATED_DATA_DIR
-        pos_file = folder / f"{domain}_positive_documents.jsonl"
-        neg_file = folder / f"{domain.lower()}_all_negative_documents.jsonl"
+    corpus_file = CORPUS_DIR / f"{domain}_documents.jsonl"
 
-    # Load positive documents
-    if pos_file.exists():
-        with open(pos_file, 'r', encoding='utf-8') as f:
+    # Load documents
+    if corpus_file.exists():
+        with open(corpus_file, 'r', encoding='utf-8') as f:
             for line in f:
                 if line.strip():
                     d = json.loads(line)
                     documents[d["doc_id"]] = d["content"]
-        logging.info(f"  Loaded {len(documents)} positive docs from {pos_file.name}")
+        logging.info(f"  Loaded {len(documents)} docs from {corpus_file.name}")
     else:
-        logging.warning(f"  Positive docs not found: {pos_file}")
-
-    # Load negative documents
-    neg_count = 0
-    if neg_file.exists():
-        with open(neg_file, 'r', encoding='utf-8') as f:
-            for line in f:
-                if line.strip():
-                    d = json.loads(line)
-                    documents[d["doc_id"]] = d["content"]
-                    neg_count += 1
-        logging.info(f"  Loaded {neg_count} negative docs from {neg_file.name}")
-    else:
-        logging.warning(f"  Negative docs not found: {neg_file}")
+        logging.warning(f"  Corpus file not found: {corpus_file}")
 
     return documents
 

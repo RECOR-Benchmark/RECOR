@@ -48,8 +48,11 @@ from datasets import load_dataset
 
 # Load specific subset and domain
 benchmark = load_dataset("RECOR-Benchmark/RECOR", "benchmark", split="biology")
-corpus_pos = load_dataset("RECOR-Benchmark/RECOR", "corpus_positive", split="biology")
-corpus_neg = load_dataset("RECOR-Benchmark/RECOR", "corpus_negative", split="biology")
+corpus = load_dataset("RECOR-Benchmark/RECOR", "corpus", split="biology")
+
+# Load all domains for a subset
+all_benchmarks = load_dataset("RECOR-Benchmark/RECOR", "benchmark")  # Returns all splits
+all_corpus = load_dataset("RECOR-Benchmark/RECOR", "corpus")  # Returns all splits
 
 # Available domains: biology, earth_science, economics, psychology, robotics,
 #                    sustainable_living, Drones, hardware, law, medicalsciences, politics
@@ -97,7 +100,7 @@ Visit [HuggingFace Files](https://huggingface.co/datasets/RECOR-Benchmark/RECOR/
 
 > **Note:** BRIGHT domains use `gold_doc_ids`, StackExchange domains use `supporting_doc_ids`.
 
-**Document files** (`{domain}_positive_documents.jsonl`, `{domain}_negative_documents.jsonl`):
+**Document files** (`{domain}_documents.jsonl`):
 
 ```json
 {"doc_id": "document_id", "content": "Document text content..."}
@@ -107,27 +110,10 @@ Visit [HuggingFace Files](https://huggingface.co/datasets/RECOR-Benchmark/RECOR/
 
 ```
 data/
-├── benchmark/                              # Conversational benchmark
-│   ├── Drones_benchmark.jsonl
-│   ├── biology_benchmark.jsonl
-│   ├── earth_science_benchmark.jsonl
-│   ├── economics_benchmark.jsonl
-│   ├── hardware_benchmark.jsonl
-│   ├── law_benchmark.jsonl
-│   ├── medicalsciences_benchmark.jsonl
-│   ├── politics_benchmark.jsonl
-│   ├── psychology_benchmark.jsonl
-│   ├── robotics_benchmark.jsonl
-│   └── sustainable_living_benchmark.jsonl
-├── corpus/                                 # Document corpus
-│   ├── {domain}_positive_documents.jsonl
-│   └── {domain}_negative_documents.jsonl
-└── raw/                                    # Original StackExchange QA (5 domains)
-    ├── Drones.json
-    ├── hardware.json
-    ├── law.json
-    ├── medicalsciences.json
-    └── politics.json
+├── benchmark/                              # Conversational benchmark (11 files)
+│   └── {domain}_benchmark.jsonl
+└── corpus/                                 # Document corpus (11 files)
+    └── {domain}_documents.jsonl
 ```
 
 ## Usage

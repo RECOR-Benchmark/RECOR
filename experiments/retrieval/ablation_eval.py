@@ -17,26 +17,16 @@ from tqdm import tqdm
 from .retrievers import RETRIEVAL_FUNCS, calculate_retrieval_metrics
 
 def load_corpus_from_json(queries_dir, domain):
-    """Load all documents from positive and negative JSON files"""
-    positive_file = Path(queries_dir) / f"{domain}_positive_documents.jsonl"
-    negative_file = Path(queries_dir) / f"{domain}_negative_documents.jsonl"
+    """Load all documents from corpus JSON file"""
+    corpus_file = Path(queries_dir) / "corpus" / f"{domain}_documents.jsonl"
 
     doc_ids = []
     documents = []
 
-    # Load positive documents
-    if positive_file.exists():
-        print(f"  Loading positive documents from {positive_file}")
-        with open(positive_file, 'r', encoding='utf-8') as f:
-            for line in f:
-                data = json.loads(line)
-                doc_ids.append(data['doc_id'])
-                documents.append(data['content'])
-
-    # Load negative documents
-    if negative_file.exists():
-        print(f"  Loading negative documents from {negative_file}")
-        with open(negative_file, 'r', encoding='utf-8') as f:
+    # Load documents
+    if corpus_file.exists():
+        print(f"  Loading documents from {corpus_file}")
+        with open(corpus_file, 'r', encoding='utf-8') as f:
             for line in f:
                 data = json.loads(line)
                 doc_ids.append(data['doc_id'])
@@ -46,7 +36,7 @@ def load_corpus_from_json(queries_dir, domain):
 
 def load_conversational_queries(queries_dir, domain):
     """Load conversational queries from benchmark JSONL file"""
-    query_file = Path(queries_dir) / f"{domain}_benchmark.jsonl"
+    query_file = Path(queries_dir) / "benchmark" / f"{domain}_benchmark.jsonl"
 
     conversations = []
 

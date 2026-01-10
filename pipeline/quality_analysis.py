@@ -4,7 +4,7 @@ Comprehensive Conversation Quality & Diversity Analysis (Modified)
 Modified to work with outputs_Annotated_unified and outputs_bright_unified benchmark files.
 
 Changes from original:
-- Loads documents from *_positive_documents.jsonl files
+- Loads documents from *_documents.jsonl files
 - NO document truncation (uses full text)
 - Fixes field mappings (task->domain, original_answer->gold_answer)
 - Supports both Annotated and Bright benchmark formats
@@ -520,7 +520,7 @@ class AzureClient:
 # ============================================================================
 
 class DocumentLoader:
-    """Loads and indexes documents from positive_documents.jsonl files."""
+    """Loads and indexes documents from documents.jsonl files."""
 
     def __init__(self, input_dirs: List[str]):
         self.input_dirs = [Path(d) for d in input_dirs]
@@ -528,11 +528,11 @@ class DocumentLoader:
         self._load_all_documents()
 
     def _load_all_documents(self):
-        """Load all documents from *_positive_documents.jsonl files in all input directories."""
+        """Load all documents from *_documents.jsonl files in all input directories."""
         total_files = 0
 
         for input_dir in self.input_dirs:
-            doc_files = list(input_dir.glob("*_positive_documents.jsonl"))
+            doc_files = list(input_dir.glob("*_documents.jsonl"))
             total_files += len(doc_files)
 
             logging.info(f"Loading documents from {len(doc_files)} files in {input_dir}")
