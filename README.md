@@ -128,8 +128,7 @@ data/
 ```bash
 python -m experiments.retrieval.run_retrieval \
     --model bge \
-    --dataset_dir ./data \
-    --model_data_dir queries \
+    --dataset_dir . \
     --output_dir ./results
 ```
 
@@ -138,18 +137,22 @@ python -m experiments.retrieval.run_retrieval \
 ```bash
 # Query + Conversation History
 python -m experiments.retrieval.ablation_eval \
-    --model bge --append-history
+    --model bge \
+    --dataset_dir . \
+    --append-history
 
 # Query + Reasoning + Metadata
 python -m experiments.retrieval.ablation_eval \
-    --model bge --append-reasoning --append-reasoning-metadata
+    --model bge \
+    --dataset_dir . \
+    --append-reasoning --append-reasoning-metadata
 ```
 
 ### RAG Generation + Evaluation
 
 ```bash
 python -m experiments.generation.generate_and_evaluate \
-    --retrieval-cache ./results/bge \
+    --retrieval-cache ./results/retrieval_bge \
     --generators "vllm:Qwen/Qwen2.5-14B-Instruct" \
     --output-dir ./rag_results
 ```
@@ -157,9 +160,9 @@ python -m experiments.generation.generate_and_evaluate \
 ### LLM-as-Judge Evaluation
 
 ```bash
+# Evaluate generated answers (requires Azure OpenAI credentials)
 python -m experiments.generation.llm_judge \
-    --input ./rag_results \
-    --output ./judge_results
+    --input ./rag_results/generation_TIMESTAMP
 ```
 
 ## Evaluation Metrics

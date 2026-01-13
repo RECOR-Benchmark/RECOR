@@ -18,26 +18,24 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 # CONFIGURATION - Set these paths for your environment
 # =====================================================
 
-# Base directory containing data folder
-BASE_DIR = Path(os.getenv("RECOR_DATA_DIR", "."))
+# These will be set by command line arguments or environment variables
+DATA_DIR = None
+CORPUS_DIR = None
 
-# Gen results directory
-GEN_RESULTS_DIR = Path(os.getenv("RECOR_GEN_RESULTS", BASE_DIR / "gen_results"))
 
-# Domain data folders (inside data/ subdirectory)
-DATA_DIR = BASE_DIR / "data"
-BENCHMARK_DIR = DATA_DIR / "benchmark"
-CORPUS_DIR = DATA_DIR / "corpus"
+def init_data_paths(data_dir: str = None):
+    """Initialize data paths from argument or environment variable."""
+    global DATA_DIR, CORPUS_DIR
+    base_dir = Path(data_dir) if data_dir else Path(os.getenv("RECOR_DATA_DIR", "."))
+    DATA_DIR = base_dir / "data"
+    CORPUS_DIR = DATA_DIR / "corpus"
 
 # Domain classification
 BRIGHT_DOMAINS = ["biology", "earth_science", "economics", "psychology", "robotics", "sustainable_living"]
 ANNOTATED_DOMAINS = ["Drones", "hardware", "law", "medicalsciences", "politics"]
 
-MODE_FOLDERS = {
-    "no_retrieval": "Without any documents",
-    "oracle": "Oracle [with gold docs]",
-    "retrieved": "Retrieval k=5"
-}
+# Mode suffixes used by generate_and_evaluate.py
+MODE_SUFFIXES = ["_no_retrieval", "_oracle", "_retrieved"]
 
 # =====================================================
 # AZURE OPENAI CLIENT
@@ -549,8 +547,24 @@ def compute_summary(results: Dict[str, Dict[str, Dict[str, float]]]) -> Dict[str
     return summary
 
 
+def detect_mode_from_folder(folder_name: str) -> Optional[str]:
+    """Detect retrieval mode from folder name suffix."""
+    folder_lower = folder_name.lower()
+    if folder_lower.endswith("_no_retrieval") or "no_retrieval" in folder_lower:
+        return "no_retrieval"
+    elif folder_lower.endswith("_oracle") or "oracle" in folder_lower:
+        return "oracle"
+    elif folder_lower.endswith("_retrieved") or "retrieved" in folder_lower:
+        return "retrieved"
+    return None
+
+
 def main():
     parser = argparse.ArgumentParser(description="Run LLM-as-Judge evaluation on generated answers (Azure GPT-4o)")
+    parser.add_argument("--input", type=str, required=True,
+                       help="Path to generation results directory (output from generate_and_evaluate.py)")
+    parser.add_argument("--data-dir", type=str, default=".",
+                       help="Path to dataset directory containing data/ folder (default: current directory)")
     parser.add_argument("--mode", choices=["no_retrieval", "oracle", "retrieved", "all"], default="all",
                        help="Which mode to evaluate (default: all)")
     parser.add_argument("--generator", default=None, help="Specific generator to evaluate (default: all)")
@@ -560,6 +574,14 @@ def main():
     parser.add_argument("--rate-limit-delay", type=float, default=0.05, help="Delay between requests (default: 0.05)")
 
     args = parser.parse_args()
+
+    # Initialize data paths
+    init_data_paths(args.data_dir)
+
+    input_dir = Path(args.input)
+    if not input_dir.exists():
+        print(f"ERROR: Input directory not found: {input_dir}")
+        return
 
     evaluator = LLMJudgeEvaluator(
         max_workers=args.max_workers,
@@ -572,6 +594,8 @@ def main():
     print("LLM-as-Judge Evaluator (Azure GPT-4o)")
     print("=" * 80)
     print(f"Model: {evaluator.model}")
+    print(f"Input: {input_dir}")
+    print(f"Data dir: {DATA_DIR}")
     print(f"Modes: {modes_to_process}")
     print(f"Max workers: {args.max_workers}")
     print(f"Resume: {args.resume}")
@@ -581,81 +605,87 @@ def main():
 
     all_summaries = {}
 
-    for mode in modes_to_process:
-        mode_folder = GEN_RESULTS_DIR / MODE_FOLDERS[mode]
-
-        if not mode_folder.exists():
-            logging.warning(f"Mode folder not found: {mode_folder}")
+    # Discover generator folders in input directory
+    # Format: {generator}_{mode}/ e.g., vllm_Qwen_Qwen2.5-14B-Instruct_retrieved/
+    for gen_folder in sorted(input_dir.iterdir()):
+        if not gen_folder.is_dir():
             continue
 
-        print(f"\n{'#'*80}")
-        print(f"# MODE: {mode.upper()}")
-        print(f"{'#'*80}")
+        folder_name = gen_folder.name
+        mode = detect_mode_from_folder(folder_name)
 
-        for gen_folder in sorted(mode_folder.iterdir()):
-            if not gen_folder.is_dir():
-                continue
+        if mode is None:
+            logging.warning(f"Could not detect mode from folder: {folder_name}, skipping...")
+            continue
 
-            gen_name = gen_folder.name
+        if mode not in modes_to_process:
+            continue
 
-            # Filter by generator if specified
-            if args.generator and args.generator.lower() not in gen_name.lower():
-                continue
+        # Extract generator name (remove mode suffix)
+        gen_name = folder_name
+        for suffix in MODE_SUFFIXES:
+            if gen_name.lower().endswith(suffix):
+                gen_name = gen_name[:-len(suffix)]
+                break
 
-            print(f"\n{'='*60}")
-            print(f"Generator: {gen_name}")
-            print(f"{'='*60}")
+        # Filter by generator if specified
+        if args.generator and args.generator.lower() not in gen_name.lower():
+            continue
 
-            # Checkpoint and output files
-            checkpoint_file = gen_folder / "llm_judge_checkpoint.json"
-            output_file = gen_folder / "llm_judge_results.json"
-            summary_file = gen_folder / "llm_judge_summary.json"
+        print(f"\n{'='*60}")
+        print(f"Generator: {gen_name} | Mode: {mode.upper()}")
+        print(f"{'='*60}")
 
-            # Skip if already complete and not resuming
-            if output_file.exists() and not args.resume:
-                print(f"  Already complete. Use --resume to re-evaluate.")
-                # Load existing summary
-                if summary_file.exists():
-                    with open(summary_file, 'r') as f:
-                        all_summaries[(mode, gen_name)] = json.load(f)
-                continue
+        # Checkpoint and output files
+        checkpoint_file = gen_folder / "llm_judge_checkpoint.json"
+        output_file = gen_folder / "llm_judge_results.json"
+        summary_file = gen_folder / "llm_judge_summary.json"
 
-            # Process
-            results = process_generator_folder(
-                evaluator=evaluator,
-                gen_folder=gen_folder,
-                mode=mode,
-                checkpoint_file=checkpoint_file
-            )
+        # Skip if already complete and not resuming
+        if output_file.exists() and not args.resume:
+            print(f"  Already complete. Use --resume to re-evaluate.")
+            # Load existing summary
+            if summary_file.exists():
+                with open(summary_file, 'r') as f:
+                    all_summaries[(mode, gen_name)] = json.load(f)
+            continue
 
-            # Save final results
-            with open(output_file, 'w', encoding='utf-8') as f:
-                json.dump(results, f, indent=2)
+        # Process
+        results = process_generator_folder(
+            evaluator=evaluator,
+            gen_folder=gen_folder,
+            mode=mode,
+            checkpoint_file=checkpoint_file
+        )
 
-            # Compute and save summary
-            summary = compute_summary(results)
-            summary["generator"] = gen_name
-            summary["mode"] = mode
-            summary["api_calls"] = evaluator.call_count
-            summary["total_tokens"] = evaluator.total_tokens
-            summary["errors"] = evaluator.errors
+        # Save final results
+        with open(output_file, 'w', encoding='utf-8') as f:
+            json.dump(results, f, indent=2)
 
-            with open(summary_file, 'w', encoding='utf-8') as f:
-                json.dump(summary, f, indent=2)
+        # Compute and save summary
+        summary = compute_summary(results)
+        summary["generator"] = gen_name
+        summary["mode"] = mode
+        summary["api_calls"] = evaluator.call_count
+        summary["total_tokens"] = evaluator.total_tokens
+        summary["errors"] = evaluator.errors
 
-            all_summaries[(mode, gen_name)] = summary
+        with open(summary_file, 'w', encoding='utf-8') as f:
+            json.dump(summary, f, indent=2)
 
-            print(f"\nResults saved to: {output_file}")
-            print(f"Summary: avg={summary.get('llm_judge_avg', 0):.3f}, "
-                  f"correct={summary.get('llm_correctness', 0):.3f}, "
-                  f"complete={summary.get('llm_completeness', 0):.3f}, "
-                  f"relevant={summary.get('llm_relevance', 0):.3f}, "
-                  f"coherent={summary.get('llm_coherence', 0):.3f}, "
-                  f"faithful={summary.get('llm_faithfulness', 0):.3f}")
+        all_summaries[(mode, gen_name)] = summary
 
-            # Clean up checkpoint
-            if checkpoint_file.exists():
-                checkpoint_file.unlink()
+        print(f"\nResults saved to: {output_file}")
+        print(f"Summary: avg={summary.get('llm_judge_avg', 0):.3f}, "
+              f"correct={summary.get('llm_correctness', 0):.3f}, "
+              f"complete={summary.get('llm_completeness', 0):.3f}, "
+              f"relevant={summary.get('llm_relevance', 0):.3f}, "
+              f"coherent={summary.get('llm_coherence', 0):.3f}, "
+              f"faithful={summary.get('llm_faithfulness', 0):.3f}")
+
+        # Clean up checkpoint
+        if checkpoint_file.exists():
+            checkpoint_file.unlink()
 
     # Print final comparison
     print("\n" + "=" * 80)

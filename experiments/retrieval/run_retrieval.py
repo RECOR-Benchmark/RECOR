@@ -6,29 +6,27 @@ from tqdm import tqdm
 from .retrievers import RETRIEVAL_FUNCS, calculate_retrieval_metrics
 
 def load_corpus(corpus_dir, domain):
-    """Load all documents from a domain's corpus directory"""
-    domain_dir = Path(corpus_dir) / domain
+    """Load all documents from corpus JSONL file"""
+    corpus_file = Path(corpus_dir) / f"{domain}_documents.jsonl"
     doc_ids = []
     documents = []
 
-    # Get all .txt files
-    txt_files = sorted(domain_dir.glob("*.txt"))
+    if not corpus_file.exists():
+        print(f"Warning: Corpus file not found: {corpus_file}")
+        return doc_ids, documents
 
-    for txt_file in tqdm(txt_files, desc=f"Loading {domain} corpus"):
-        # Document ID is relative path: domain/filename.txt
-        doc_id = f"{domain}/{txt_file.name}"
-        doc_ids.append(doc_id)
-
-        # Read document content
-        with open(txt_file, 'r', encoding='utf-8') as f:
-            content = f.read()
-        documents.append(content)
+    with open(corpus_file, 'r', encoding='utf-8') as f:
+        for line in tqdm(f, desc=f"Loading {domain} corpus"):
+            if line.strip():
+                data = json.loads(line)
+                doc_ids.append(data['doc_id'])
+                documents.append(data['content'])
 
     return doc_ids, documents
 
 def load_queries(queries_dir, domain):
-    """Load queries from domain's JSONL file"""
-    query_file = Path(queries_dir) /f"{domain}_queries.jsonl"
+    """Load queries from benchmark JSONL file (flattens conversational turns)"""
+    query_file = Path(queries_dir) / f"{domain}_benchmark.jsonl"
 
     queries = []
     query_ids = []
@@ -41,19 +39,27 @@ def load_queries(queries_dir, domain):
 
     with open(query_file, 'r', encoding='utf-8') as f:
         for line in f:
-            data = json.loads(line)
-            if len(data['gold_ids']) > 0:
-                query_id = data['id']
-                query_ids.append(query_id)
-                queries.append(data['query'])
+            if not line.strip():
+                continue
+            conv = json.loads(line)
+            conv_id = conv['id']
 
-                # Store gold IDs for evaluation
-                gold_ids_map[query_id] = data['gold_ids']
+            for turn in conv.get('turns', []):
+                # Get gold doc IDs (unified format)
+                gold_ids = turn.get('gold_doc_ids', [])
+                if not gold_ids:
+                    gold_ids = turn.get('supporting_doc_ids', [])
 
-                # Store negative IDs as excluded
-                excluded_ids[query_id] = data.get('negative_ids', [])
+                if len(gold_ids) > 0:
+                    query_id = f"{conv_id}_turn_{turn['turn_id']}"
+                    query_ids.append(query_id)
+                    queries.append(turn['query'])
 
+                    # Store gold IDs for evaluation
+                    gold_ids_map[query_id] = gold_ids
 
+                    # No excluded IDs in benchmark format
+                    excluded_ids[query_id] = []
 
     return queries, query_ids, gold_ids_map, excluded_ids
 
@@ -63,8 +69,9 @@ def evaluate_domain(domain, dataset_dir, args, config):
     print(f"EVALUATING DOMAIN: {domain.upper()}")
     print("="*80)
 
-    corpus_dir = Path(dataset_dir) / "corpus"
-    queries_dir = Path(dataset_dir) / args.model_data_dir
+    data_dir = Path(dataset_dir) / args.model_data_dir
+    corpus_dir = data_dir / "corpus"
+    benchmark_dir = data_dir / "benchmark"
 
     # Load corpus for this domain only
     print(f"\nLoading {domain} corpus...")
@@ -77,7 +84,7 @@ def evaluate_domain(domain, dataset_dir, args, config):
 
     # Load queries for this domain only
     print(f"\nLoading {domain} queries...")
-    queries, query_ids, gold_ids_map, excluded_ids = load_queries(queries_dir, domain)
+    queries, query_ids, gold_ids_map, excluded_ids = load_queries(benchmark_dir, domain)
     print(f"  Queries: {len(queries)}")
 
     if len(queries) == 0:
@@ -113,7 +120,7 @@ def evaluate_domain(domain, dataset_dir, args, config):
     domain_output_dir = os.path.join(args.output_dir, domain)
     os.makedirs(domain_output_dir, exist_ok=True)
 
-    score_file_path = os.path.join(domain_output_dir, 'scores.json')
+    score_file_path = os.path.join(domain_output_dir, 'all_scores.json')
 
     # Run retrieval
     if not os.path.isfile(score_file_path):
@@ -171,13 +178,14 @@ def evaluate_domain(domain, dataset_dir, args, config):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset_dir', type=str, required=True,
-                        help='Path to dataset directory (contains corpus/, queries/, images/)')
+                        help='Path to dataset directory (contains data/ folder with benchmark and corpus)')
     parser.add_argument('--domains', type=str, nargs='+',
                         default=['biology', 'Drones', 'earth_science', 'economics',
                                 'hardware', 'law', 'medicalsciences', 'politics',
                                 'psychology', 'robotics', 'sustainable_living'],
                         help='List of domains to evaluate')
-    parser.add_argument('--model_data_dir', type=str, required=True)
+    parser.add_argument('--model_data_dir', type=str, default='data',
+                        help='Subdirectory containing benchmark/ and corpus/ folders')
 
     parser.add_argument('--model', type=str, required=True,
                         choices=['bm25','cohere','e5','google','grit','inst-l','inst-xl',
@@ -196,7 +204,7 @@ def main():
     args = parser.parse_args()
 
     # Create main output directory
-    args.output_dir = os.path.join(args.output_dir, f"multimodal_ir_{args.model}")
+    args.output_dir = os.path.join(args.output_dir, f"retrieval_{args.model}")
     os.makedirs(args.output_dir, exist_ok=True)
 
     # Load model config
@@ -250,12 +258,12 @@ def main():
             'per_domain': all_domain_results
         }
 
-        with open(os.path.join(args.output_dir, 'summary.json'), 'w') as f:
+        with open(os.path.join(args.output_dir, 'final_summary.json'), 'w') as f:
             json.dump(summary, f, indent=2)
 
         print(f"\n Evaluation complete! Results saved to {args.output_dir}")
-        print(f"  - Per-domain results: {args.output_dir}/<domain>/results.json")
-        print(f"  - Aggregated summary: {args.output_dir}/summary.json")
+        print(f"  - Per-domain results: {args.output_dir}/<domain>/all_scores.json")
+        print(f"  - Aggregated summary: {args.output_dir}/final_summary.json")
     else:
         print("\nNo domains were successfully evaluated.")
 
