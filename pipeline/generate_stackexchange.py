@@ -3213,10 +3213,12 @@ def process_single_example(
         "num_turns": len(turns_conversational),
         "turns": turns_conversational,
         "metadata": {
-            "source": "annotated_data",
             "num_turns": len(turns_conversational),
+            "gold_doc_count": len(gold_doc_ids),
+            "version": "unified_v1",
             "created_at": timestamp,
-            "method": "unified_bright_workflow"
+            "source": "stackexchange",
+            "method": "unified_stackexchange_workflow"
         }
     }
     
@@ -3277,7 +3279,7 @@ def create_benchmark_entry(
                 "turn_id": turn["turn_id"],
                 "query": turn["conversational_query"],
                 "answer": turn["answer"],
-                "supporting_doc_ids": turn["supporting_doc_ids"],
+                "gold_doc_ids": turn["supporting_doc_ids"],
                 "subquestion_reasoning": turn.get("subquestion_reasoning", ""),
                 "conversation_history": turn.get("conversation_history_at_turn", "")
             }
@@ -3310,7 +3312,7 @@ def create_analysis_entry(
                 "turn_id": turn["turn_id"],
                 "query": turn["conversational_query"],
                 "answer": turn["answer"],
-                "supporting_doc_ids": turn["supporting_doc_ids"],
+                "gold_doc_ids": turn["supporting_doc_ids"],
                 "sub_question": turn.get("sub_question", ""),
                 "semantic_facts": turn.get("semantic_facts", []),
                 "facts_covered": turn.get("facts_covered", ""),

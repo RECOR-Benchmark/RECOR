@@ -8,7 +8,7 @@ Changes from original:
 - NO document truncation (uses full text)
 - Fixes field mappings (task->domain, original_answer->gold_answer)
 - Supports both Annotated and Bright benchmark formats
-- Resolves supporting_doc_ids/gold_doc_ids to actual document content
+- Resolves gold_doc_ids to actual document content
 - Can process BOTH folders (all 11 benchmark files) in ONE run
 
 Usage:
@@ -689,17 +689,13 @@ def compute_entropy(items: List[str]) -> float:
 
 
 def get_doc_ids_from_turn(turn: Dict, dataset_source: str) -> List[str]:
-    """Extract document IDs from a turn based on dataset source."""
-    if dataset_source == "annotated":
-        return turn.get('supporting_doc_ids', [])
-    elif dataset_source == "bright":
-        return turn.get('gold_doc_ids', [])
-    else:
-        # Try both - supporting_doc_ids first, then gold_doc_ids
+    """Extract document IDs from a turn. Uses gold_doc_ids (unified format)."""
+    # Primary: use gold_doc_ids (unified format for all domains)
+    doc_ids = turn.get('gold_doc_ids', [])
+    # Fallback: supporting_doc_ids (legacy format)
+    if not doc_ids:
         doc_ids = turn.get('supporting_doc_ids', [])
-        if not doc_ids:
-            doc_ids = turn.get('gold_doc_ids', [])
-        return doc_ids
+    return doc_ids
 
 
 def get_all_doc_ids_from_conversation(conversation: Dict) -> List[str]:

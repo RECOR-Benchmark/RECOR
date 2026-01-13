@@ -94,11 +94,16 @@ Visit [HuggingFace Files](https://huggingface.co/datasets/RECOR-Benchmark/RECOR/
       }
     }
   ],
-  "metadata": {"num_turns": 3, "created_at": "..."}
+  "metadata": {
+    "num_turns": 3,
+    "gold_doc_count": 5,
+    "version": "unified_v1",
+    "created_at": "...",
+    "source": "bright",
+    "method": "unified_bright_workflow"
+  }
 }
 ```
-
-> **Note:** BRIGHT domains use `gold_doc_ids`, StackExchange domains use `supporting_doc_ids`.
 
 **Document files** (`{domain}_documents.jsonl`):
 

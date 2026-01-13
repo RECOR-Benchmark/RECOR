@@ -3302,7 +3302,9 @@ def create_benchmark_entry(full: Dict[str, Any]) -> Dict[str, Any]:
             "num_turns": full["num_turns"],
             "gold_doc_count": full["metadata"]["gold_doc_count"],
             "version": full["metadata"]["version"],
-            "created_at": full["metadata"].get("created_at", "")
+            "created_at": full["metadata"].get("created_at", ""),
+            "source": "bright",
+            "method": "unified_bright_workflow"
         }
     }
 
