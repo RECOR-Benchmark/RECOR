@@ -1,591 +1,596 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="description" content="RECOR: A Reasoning-focused Multi-turn Conversational Retrieval Benchmark">
-  <meta name="keywords" content="RECOR, conversational retrieval, reasoning, benchmark, dataset, RAG">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>RECOR: Reasoning-focused Multi-turn Conversational Retrieval Benchmark</title>
+ <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text
+  y='.9em' font-size='90'>💬</text></svg>">
+    <meta name="description" content="RECOR: A Reasoning-focused Multi-turn Conversational Retrieval Benchmark">
+    <meta name="keywords" content="RECOR, conversational retrieval, reasoning, benchmark, dataset, RAG">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>RECOR: Reasoning-focused Multi-turn Conversational Retrieval Benchmark</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
-  <link rel="stylesheet" href="style.css">
-</head>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+  rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+    <link rel="stylesheet" href="style.css">
+  </head>
 
-<body>
+  <body>
 
-  <nav class="navbar" role="navigation" aria-label="main navigation">
-    <div class="navbar-brand">
-      <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
-        <span aria-hidden="true"></span>
-        <span aria-hidden="true"></span>
-        <span aria-hidden="true"></span>
-      </a>
-    </div>
-    <div class="navbar-menu">
-      <div class="navbar-start" style="flex-grow: 1; justify-content: center;">
-        <a class="navbar-item" href="#">
-          <span class="icon">
-            <i class="fas fa-home"></i>
-          </span>
+    <nav class="navbar" role="navigation" aria-label="main navigation">
+      <div class="navbar-brand">
+        <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
         </a>
-        <div class="navbar-item has-dropdown is-hoverable">
-          <a class="navbar-link">
-            More Research
+      </div>
+      <div class="navbar-menu">
+        <div class="navbar-start" style="flex-grow: 1; justify-content: center;">
+          <a class="navbar-item" href="#">
+            <span class="icon">
+              <i class="fas fa-home"></i>
+            </span>
           </a>
-          <div class="navbar-dropdown">
-            <a class="navbar-item" href="https://github.com/RECOR-Benchmark">
-              RECOR Benchmark
+          <div class="navbar-item has-dropdown is-hoverable">
+            <a class="navbar-link">
+              More Research
             </a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </nav>
-
-  <div class="hero-body">
-    <div class="container is-max-desktop">
-      <div class="columns is-centered">
-        <h1 class="title is-1 publication-title has-text-centered">
-          RECOR: Reasoning-focused Multi-turn Conversational Retrieval Benchmark<br>
-        </h1>
-      </div>
-    </div>
-  </div>
-
-  <div class="columns is-centered">
-    <div class="is-size-5 publication-authors has-text-centered">
-      <span class="author-block"><em>Anonymous Authors</em></span>
-    </div>
-  </div>
-
-  <div class="columns is-centered">
-    <div class="is-size-5 publication-authors has-text-centered">
-      <span class="author-block"><em>Paper under review</em></span>
-    </div>
-  </div>
-
-  <div class="column has-text-centered">
-    <div class="publication-links">
-      <!-- Paper Link -->
-      <span class="link-block">
-        <a href="https://arxiv.org/abs/2601.05461" class="external-link button is-normal is-rounded is-dark">
-          <span class="icon">
-            <i class="ai ai-arxiv"></i>
-          </span>
-          <span>Paper</span>
-        </a>
-      </span>
-      <!-- Code Link -->
-      <span class="link-block">
-        <a href="https://github.com/RECOR-Benchmark/RECOR" class="external-link button is-normal is-rounded is-dark">
-          <span class="icon">
-            <i class="fab fa-github"></i>
-          </span>
-          <span>Code</span>
-        </a>
-      </span>
-      <!-- Dataset Link -->
-      <span class="link-block">
-        <a href="https://huggingface.co/datasets/RECOR-Benchmark/RECOR" class="external-link button is-normal is-rounded is-dark">
-          <span class="icon">
-            <i class="fas fa-database"></i>
-          </span>
-          <span>Data</span>
-        </a>
-      </span>
-    </div>
-  </div>
-
-  <div class="container" style="margin-top: 50px; margin-bottom: 50px;">
-    <div class="columns">
-      <div class="column is-half">
-        <div class="infoCard">
-          <div class="infoBody">
-            <div class="infoHeadline">
-              <h2>Why a new benchmark?</h2>
-            </div>
-            <p>
-              Existing conversational retrieval benchmarks focus on simple query reformulation, while
-              reasoning-intensive scenarios remain underexplored. Real-world information needs often require
-              understanding the logical flow of conversation to find relevant documents. We introduce
-              <strong>RECOR</strong> to better benchmark retrieval on such challenging and realistic scenarios.
-            </p>
-
-            <div class="infoHeadline" style="margin-top: 20px;">
-              <h2>RECOR</h2>
-            </div>
-            <p>
-              RECOR is a reasoning-focused multi-turn conversational retrieval benchmark featuring 707
-              conversations with 2,971 turns across 11 diverse domains. It includes a Decomposition-and-Verification
-              framework for generating grounded multi-turn dialogues with rich reasoning metadata.
-            </p>
-            <figure class="recor-figure">
-              <img src="../assets/pipeline.png" alt="RECOR pipeline diagram." onerror="this.style.display='none'">
-            </figure>
-
-            <div class="infoHeadline">
-              <h2>Leaderboard submission</h2>
-            </div>
-            <p>
-              If you would like to submit your results to the leaderboard, please open a pull request or issue on our <a href="https://github.com/RECOR-Benchmark/RECOR">GitHub repository</a>.
-            </p>
-
-            <div class="infoHeadline">
-              <h2>Have Questions?</h2>
-            </div>
-            <p>
-              Contact the authors or open an issue on GitHub.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div class="column is-half">
-        <div class="infoCard">
-          <div class="infoBody">
-            <div class="infoHeadline">
-              <h2>Leaderboard</h2>
-            </div>
-
-            <div class="tabs is-centered is-small" style="margin-bottom: 0;">
-              <ul>
-                <li class="is-active" data-tab="task1">
-                  <a>
-                    <span>Retrieval (nDCG@10)</span>
-                  </a>
-                </li>
-                <li data-tab="task2">
-                  <a>
-                    <span>RAG Generation</span>
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div id="task1-content" class="tab-content">
-              <p style="margin-bottom: 1rem;">
-                Performance with <strong>History + Reasoning (H+R)</strong> context. nDCG@10 macro-averaged across 11 domains.
-              </p>
-              <table class="table performanceTable">
-                <thead>
-                  <tr>
-                    <th width="10%">Rank</th>
-                    <th width="30%">Model</th>
-                    <th width="20%">Type</th>
-                    <th width="15%">Base</th>
-                    <th width="15%">H+R</th>
-                    <th width="10%">Gain</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td class="rank-cell"><span class="medal-1">1</span></td>
-                    <td>
-                      <strong>DIVER</strong>
-                    </td>
-                    <td><span class="tag is-reasoning">Reasoning</span></td>
-                    <td>.347</td>
-                    <td class="score-cell"><strong>.584</strong></td>
-                    <td class="gain-cell">+68%</td>
-                  </tr>
-                  <tr>
-                    <td class="rank-cell"><span class="medal-2">2</span></td>
-                    <td>
-                      <strong>ReasonIR</strong>
-                    </td>
-                    <td><span class="tag is-reasoning">Reasoning</span></td>
-                    <td>.266</td>
-                    <td class="score-cell"><strong>.552</strong></td>
-                    <td class="gain-cell">+108%</td>
-                  </tr>
-                  <tr>
-                    <td class="rank-cell"><span class="medal-3">3</span></td>
-                    <td>
-                      <strong>BM25</strong>
-                    </td>
-                    <td><span class="tag is-sparse">Sparse</span></td>
-                    <td>.185</td>
-                    <td class="score-cell"><strong>.489</strong></td>
-                    <td class="gain-cell">+164%</td>
-                  </tr>
-                  <tr>
-                    <td class="rank-cell">4</td>
-                    <td>
-                      <strong>SFR</strong>
-                    </td>
-                    <td><span class="tag is-dense">Dense</span></td>
-                    <td>.240</td>
-                    <td class="score-cell">.464</td>
-                    <td class="gain-cell">+93%</td>
-                  </tr>
-                  <tr>
-                    <td class="rank-cell">5</td>
-                    <td>
-                      <strong>Qwen</strong>
-                    </td>
-                    <td><span class="tag is-dense">Dense</span></td>
-                    <td>.269</td>
-                    <td class="score-cell">.461</td>
-                    <td class="gain-cell">+71%</td>
-                  </tr>
-                  <tr>
-                    <td class="rank-cell">6</td>
-                    <td>
-                      <strong>BGE</strong>
-                    </td>
-                    <td><span class="tag is-dense">Dense</span></td>
-                    <td>.230</td>
-                    <td class="score-cell">.445</td>
-                    <td class="gain-cell">+93%</td>
-                  </tr>
-                  <tr>
-                    <td class="rank-cell">7</td>
-                    <td>
-                      <strong>E5</strong>
-                    </td>
-                    <td><span class="tag is-dense">Dense</span></td>
-                    <td>.183</td>
-                    <td class="score-cell">.429</td>
-                    <td class="gain-cell">+134%</td>
-                  </tr>
-                  <tr>
-                    <td class="rank-cell">8</td>
-                    <td>
-                      <strong>Contriever</strong>
-                    </td>
-                    <td><span class="tag is-dense">Dense</span></td>
-                    <td>.168</td>
-                    <td class="score-cell">.409</td>
-                    <td class="gain-cell">+144%</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <div id="task2-content" class="tab-content" style="display: none;">
-              <p style="margin-bottom: 1rem;">
-                RAG generation with retrieved context. LLM-Judge average across 5 dimensions (0-1 scale).
-              </p>
-              <table class="table performanceTable">
-                <thead>
-                  <tr>
-                    <th width="8%">Rank</th>
-                    <th width="27%">Model</th>
-                    <th width="13%">Correct.</th>
-                    <th width="13%">Compl.</th>
-                    <th width="13%">Relev.</th>
-                    <th width="13%">Coher.</th>
-                    <th width="13%">Avg</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td class="rank-cell"><span class="medal-1">1</span></td>
-                    <td><strong>Llama-3.3-70B</strong></td>
-                    <td>.870</td>
-                    <td>.846</td>
-                    <td>.909</td>
-                    <td>.940</td>
-                    <td class="score-cell"><strong>.880</strong></td>
-                  </tr>
-                  <tr>
-                    <td class="rank-cell"><span class="medal-2">2</span></td>
-                    <td><strong>Qwen2.5-72B</strong></td>
-                    <td>.848</td>
-                    <td>.781</td>
-                    <td>.896</td>
-                    <td>.929</td>
-                    <td class="score-cell"><strong>.860</strong></td>
-                  </tr>
-                  <tr>
-                    <td class="rank-cell"><span class="medal-3">3</span></td>
-                    <td><strong>Gemma-3-12B</strong></td>
-                    <td>.840</td>
-                    <td>.784</td>
-                    <td>.879</td>
-                    <td>.916</td>
-                    <td class="score-cell"><strong>.854</strong></td>
-                  </tr>
-                  <tr>
-                    <td class="rank-cell">4</td>
-                    <td>Qwen2.5-14B</td>
-                    <td>.840</td>
-                    <td>.776</td>
-                    <td>.888</td>
-                    <td>.920</td>
-                    <td class="score-cell">.852</td>
-                  </tr>
-                  <tr>
-                    <td class="rank-cell">5</td>
-                    <td>Llama-3.1-8B</td>
-                    <td>.816</td>
-                    <td>.787</td>
-                    <td>.864</td>
-                    <td>.911</td>
-                    <td class="score-cell">.840</td>
-                  </tr>
-                  <tr>
-                    <td class="rank-cell">6</td>
-                    <td>Qwen2.5-7B</td>
-                    <td>.816</td>
-                    <td>.760</td>
-                    <td>.868</td>
-                    <td>.912</td>
-                    <td class="score-cell">.835</td>
-                  </tr>
-                  <tr>
-                    <td class="rank-cell">7</td>
-                    <td>Mistral-7B</td>
-                    <td>.799</td>
-                    <td>.750</td>
-                    <td>.847</td>
-                    <td>.895</td>
-                    <td class="score-cell">.819</td>
-                  </tr>
-                </tbody>
-              </table>
+            <div class="navbar-dropdown">
+              <a class="navbar-item" href="https://github.com/RECOR-Benchmark">
+                RECOR Benchmark
+              </a>
+              <a class="navbar-item" href="https://mm-bright.github.io/">
+                MM-BRIGHT
+              </a>
+              <a class="navbar-item" href="https://tempo-bench.github.io/">
+                TEMPO
+              </a>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  </div>
+    </nav>
 
-  <section class="section" style="background-color: #f5f5f5;">
-    <div class="container is-max-desktop">
-      <div class="columns is-centered">
-        <div class="column is-full-width has-text-centered">
-          <h2 class="title is-3" id="overview">RECOR Overview</h2>
-        </div>
-      </div>
-      <div class="columns is-multiline">
-        <div class="column is-one-third">
-          <div class="recor-card">
-            <h3 class="title is-5">What Makes RECOR Different</h3>
-            <h4 class="title is-6">Reasoning-Intensive Retrieval</h4>
-            <p>
-              Queries require understanding the logical flow of conversation, building reasoning chains,
-              and synthesizing evidence across multiple turns.
-            </p>
-          </div>
-        </div>
-        <div class="column is-one-third">
-          <div class="recor-card">
-            <h3 class="title is-5">Decomposition Framework</h3>
-            <p>
-              Each conversation is generated through a Decomposition-and-Verification framework with
-              step-wise reasoning metadata for fine-grained evaluation.
-            </p>
-          </div>
-        </div>
-        <div class="column is-one-third">
-          <div class="recor-card">
-            <h3 class="title is-5">Rich Annotations</h3>
-            <p>
-              Each turn includes target information, relevance signals, and irrelevance signals
-              to enable detailed analysis of retrieval behavior.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div class="columns is-centered" style="margin-top: 2rem;">
-        <div class="column is-full-width">
-          <h3 class="title is-4">Domains</h3>
-          <p class="content">
-            <strong>BRIGHT:</strong> Biology, Earth Science, Economics, Psychology, Robotics, Sustainable Living<br>
-            <strong>StackExchange:</strong> Drones, Hardware, Law, Medical Sciences, Politics
-          </p>
+    <div class="hero-body">
+      <div class="container is-max-desktop">
+        <div class="columns is-centered">
+          <h1 class="title is-1 publication-title has-text-centered">
+            RECOR: Reasoning-focused Multi-turn Conversational Retrieval Benchmark<br>
+          </h1>
         </div>
       </div>
     </div>
-  </section>
 
-  <section class="section">
-    <div class="container is-max-desktop">
-      <h2 class="title is-3">Key Findings</h2>
+    <div class="columns is-centered">
+      <div class="is-size-5 publication-authors has-text-centered">
+        <span class="author-block"><a href="#">Mohammed Ali</a><sup>1</sup>,</span>
+        <span class="author-block"><a href="#">Abdelrahman Abdallah</a><sup>1</sup>,</span>
+        <span class="author-block"><a href="#">Amit Agarwal</a><sup>2</sup>,</span>
+        <span class="author-block"><a href="#">Hitesh Laxmichand Patel</a><sup>2</sup>,</span>
+        <span class="author-block"><a href="#">Adam Jatowt</a><sup>1</sup></span>
+      </div>
+    </div>
+
+    <div class="columns is-centered">
+      <div class="is-size-5 publication-authors has-text-centered">
+        <span class="author-block"><sup>1</sup>University of Innsbruck,</span>
+        <span class="author-block"><sup>2</sup>Oracle AI (USA)</span>
+      </div>
+    </div>
+
+    <div class="column has-text-centered">
+      <div class="publication-links">
+        <!-- Paper Link -->
+        <span class="link-block">
+          <a href="https://arxiv.org/abs/2601.05461" class="external-link button is-normal is-rounded is-dark">
+            <span class="icon">
+              <i class="ai ai-arxiv"></i>
+            </span>
+            <span>Paper</span>
+          </a>
+        </span>
+        <!-- Code Link -->
+        <span class="link-block">
+          <a href="https://github.com/RECOR-Benchmark/RECOR" class="external-link button is-normal is-rounded
+  is-dark">
+            <span class="icon">
+              <i class="fab fa-github"></i>
+            </span>
+            <span>Code</span>
+          </a>
+        </span>
+        <!-- Dataset Link -->
+        <span class="link-block">
+          <a href="https://huggingface.co/datasets/RECOR-Benchmark/RECOR" class="external-link button is-normal
+  is-rounded is-dark">
+            <span class="icon">
+              <i class="fas fa-database"></i>
+            </span>
+            <span>Data</span>
+          </a>
+        </span>
+      </div>
+    </div>
+
+    <div class="container" style="margin-top: 50px; margin-bottom: 50px;">
       <div class="columns">
-        <div class="column">
-          <div class="recor-callout">
-            <h3 class="title is-5">Reasoning Context Doubles Performance</h3>
-            <p>
-              Combining conversation history with reasoning doubles retrieval performance
-              (Baseline .236 → History+Reasoning .479 nDCG@10, +103% improvement).
-            </p>
+        <div class="column is-half">
+          <div class="infoCard">
+            <div class="infoBody">
+              <div class="infoHeadline">
+                <h2>Why a new benchmark?</h2>
+              </div>
+              <p>
+                Existing conversational retrieval benchmarks focus on simple query reformulation, while
+                reasoning-intensive scenarios remain underexplored. Real-world information needs often require
+                understanding the logical flow of conversation to find relevant documents. We introduce
+                <strong>RECOR</strong> to better benchmark retrieval on such challenging and realistic scenarios.
+              </p>
+
+              <div class="infoHeadline" style="margin-top: 20px;">
+                <h2>RECOR</h2>
+              </div>
+              <p>
+                RECOR is a reasoning-focused multi-turn conversational retrieval benchmark featuring 707
+                conversations with 2,971 turns across 11 diverse domains. It includes a Decomposition-and-Verification
+                framework for generating grounded multi-turn dialogues with rich reasoning metadata.
+              </p>
+              <figure class="recor-figure">
+                <img src="../assets/pipeline.png" alt="RECOR pipeline diagram." onerror="this.style.display='none'">
+              </figure>
+
+              <div class="infoHeadline">
+                <h2>Leaderboard submission</h2>
+              </div>
+              <p>
+                If you would like to submit your results to the leaderboard, please open a pull request or issue on
+  our <a href="https://github.com/RECOR-Benchmark/RECOR">GitHub repository</a>.
+              </p>
+
+              <div class="infoHeadline">
+                <h2>Have Questions?</h2>
+              </div>
+              <p>
+                Contact the authors or open an issue on GitHub.
+              </p>
+            </div>
           </div>
         </div>
-        <div class="column">
-          <div class="recor-callout">
-            <h3 class="title is-5">Reasoning-Specialized Models Excel</h3>
-            <p>
-              DIVER achieves .584 nDCG@10, substantially outperforming dense encoders like SFR (.464).
-              Reasoning-enhanced approaches show consistent improvements across all 11 domains.
-            </p>
-          </div>
-        </div>
-      </div>
-      <div class="columns" style="margin-top: 1rem;">
-        <div class="column">
-          <div class="recor-callout">
-            <h3 class="title is-5">Turn Position Effects</h3>
-            <p>
-              Baseline performance drops 31% from Turn 1 (.324) to Turn 2 (.224). History+Reasoning
-              shows improvement across turns, reaching .532 by Turn 4.
-            </p>
-          </div>
-        </div>
-        <div class="column">
-          <div class="recor-callout">
-            <h3 class="title is-5">Small Models Competitive in RAG</h3>
-            <p>
-              7-8B parameter models score only 5-7 points below 70B+ models when provided
-              with retrieved passages. Moderate correlation (r=.42) between retrieval and generation.
-            </p>
+
+        <div class="column is-half">
+          <div class="infoCard">
+            <div class="infoBody">
+              <div class="infoHeadline">
+                <h2>Leaderboard</h2>
+              </div>
+
+              <div class="tabs is-centered is-small" style="margin-bottom: 0;">
+                <ul>
+                  <li class="is-active" data-tab="task1">
+                    <a>
+                      <span>Retrieval (nDCG@10)</span>
+                    </a>
+                  </li>
+                  <li data-tab="task2">
+                    <a>
+                      <span>RAG Generation</span>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+
+              <div id="task1-content" class="tab-content">
+                <p style="margin-bottom: 1rem;">
+                  Performance with <strong>History + Reasoning (H+R)</strong> context. nDCG@10 macro-averaged across
+  11 domains.
+                </p>
+                <table class="table performanceTable">
+                  <thead>
+                    <tr>
+                      <th width="10%">Rank</th>
+                      <th width="30%">Model</th>
+                      <th width="20%">Type</th>
+                      <th width="15%">Base</th>
+                      <th width="15%">H+R</th>
+                      <th width="10%">Gain</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="rank-cell"><span class="medal-1">1</span></td>
+                      <td>
+                        <strong>DIVER</strong>
+                      </td>
+                      <td><span class="tag is-reasoning">Reasoning</span></td>
+                      <td>.347</td>
+                      <td class="score-cell"><strong>.584</strong></td>
+                      <td class="gain-cell">+68%</td>
+                    </tr>
+                    <tr>
+                      <td class="rank-cell"><span class="medal-2">2</span></td>
+                      <td>
+                        <strong>ReasonIR</strong>
+                      </td>
+                      <td><span class="tag is-reasoning">Reasoning</span></td>
+                      <td>.266</td>
+                      <td class="score-cell"><strong>.552</strong></td>
+                      <td class="gain-cell">+108%</td>
+                    </tr>
+                    <tr>
+                      <td class="rank-cell"><span class="medal-3">3</span></td>
+                      <td>
+                        <strong>BM25</strong>
+                      </td>
+                      <td><span class="tag is-sparse">Sparse</span></td>
+                      <td>.185</td>
+                      <td class="score-cell"><strong>.489</strong></td>
+                      <td class="gain-cell">+164%</td>
+                    </tr>
+                    <tr>
+                      <td class="rank-cell">4</td>
+                      <td>
+                        <strong>SFR</strong>
+                      </td>
+                      <td><span class="tag is-dense">Dense</span></td>
+                      <td>.240</td>
+                      <td class="score-cell">.464</td>
+                      <td class="gain-cell">+93%</td>
+                    </tr>
+                    <tr>
+                      <td class="rank-cell">5</td>
+                      <td>
+                        <strong>Qwen</strong>
+                      </td>
+                      <td><span class="tag is-dense">Dense</span></td>
+                      <td>.269</td>
+                      <td class="score-cell">.461</td>
+                      <td class="gain-cell">+71%</td>
+                    </tr>
+                    <tr>
+                      <td class="rank-cell">6</td>
+                      <td>
+                        <strong>BGE</strong>
+                      </td>
+                      <td><span class="tag is-dense">Dense</span></td>
+                      <td>.230</td>
+                      <td class="score-cell">.445</td>
+                      <td class="gain-cell">+93%</td>
+                    </tr>
+                    <tr>
+                      <td class="rank-cell">7</td>
+                      <td>
+                        <strong>E5</strong>
+                      </td>
+                      <td><span class="tag is-dense">Dense</span></td>
+                      <td>.183</td>
+                      <td class="score-cell">.429</td>
+                      <td class="gain-cell">+134%</td>
+                    </tr>
+                    <tr>
+                      <td class="rank-cell">8</td>
+                      <td>
+                        <strong>Contriever</strong>
+                      </td>
+                      <td><span class="tag is-dense">Dense</span></td>
+                      <td>.168</td>
+                      <td class="score-cell">.409</td>
+                      <td class="gain-cell">+144%</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div id="task2-content" class="tab-content" style="display: none;">
+                <p style="margin-bottom: 1rem;">
+                  RAG generation with retrieved context. LLM-Judge average across 5 dimensions (0-1 scale).
+                </p>
+                <table class="table performanceTable">
+                  <thead>
+                    <tr>
+                      <th width="8%">Rank</th>
+                      <th width="27%">Model</th>
+                      <th width="13%">Correct.</th>
+                      <th width="13%">Compl.</th>
+                      <th width="13%">Relev.</th>
+                      <th width="13%">Coher.</th>
+                      <th width="13%">Avg</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="rank-cell"><span class="medal-1">1</span></td>
+                      <td><strong>Llama-3.3-70B</strong></td>
+                      <td>.870</td>
+                      <td>.846</td>
+                      <td>.909</td>
+                      <td>.940</td>
+                      <td class="score-cell"><strong>.880</strong></td>
+                    </tr>
+                    <tr>
+                      <td class="rank-cell"><span class="medal-2">2</span></td>
+                      <td><strong>Qwen2.5-72B</strong></td>
+                      <td>.848</td>
+                      <td>.781</td>
+                      <td>.896</td>
+                      <td>.929</td>
+                      <td class="score-cell"><strong>.860</strong></td>
+                    </tr>
+                    <tr>
+                      <td class="rank-cell"><span class="medal-3">3</span></td>
+                      <td><strong>Gemma-3-12B</strong></td>
+                      <td>.840</td>
+                      <td>.784</td>
+                      <td>.879</td>
+                      <td>.916</td>
+                      <td class="score-cell"><strong>.854</strong></td>
+                    </tr>
+                    <tr>
+                      <td class="rank-cell">4</td>
+                      <td>Qwen2.5-14B</td>
+                      <td>.840</td>
+                      <td>.776</td>
+                      <td>.888</td>
+                      <td>.920</td>
+                      <td class="score-cell">.852</td>
+                    </tr>
+                    <tr>
+                      <td class="rank-cell">5</td>
+                      <td>Llama-3.1-8B</td>
+                      <td>.816</td>
+                      <td>.787</td>
+                      <td>.864</td>
+                      <td>.911</td>
+                      <td class="score-cell">.840</td>
+                    </tr>
+                    <tr>
+                      <td class="rank-cell">6</td>
+                      <td>Qwen2.5-7B</td>
+                      <td>.816</td>
+                      <td>.760</td>
+                      <td>.868</td>
+                      <td>.912</td>
+                      <td class="score-cell">.835</td>
+                    </tr>
+                    <tr>
+                      <td class="rank-cell">7</td>
+                      <td>Mistral-7B</td>
+                      <td>.799</td>
+                      <td>.750</td>
+                      <td>.847</td>
+                      <td>.895</td>
+                      <td class="score-cell">.819</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </section>
 
-  <section class="section" id="statistics" style="background-color: #f5f5f5;">
-    <div class="container is-max-desktop">
-      <h2 class="title is-3">Benchmark Statistics</h2>
-      <div class="columns is-multiline">
-        <div class="column is-one-quarter">
-          <div class="recor-highlight">
-            <p class="recor-highlight-title">Conversations</p>
-            <p class="recor-highlight-value">707</p>
-            <p class="recor-highlight-meta">Multi-turn dialogues</p>
+    <section class="section" style="background-color: #f5f5f5;">
+      <div class="container is-max-desktop">
+        <div class="columns is-centered">
+          <div class="column is-full-width has-text-centered">
+            <h2 class="title is-3" id="overview">RECOR Overview</h2>
           </div>
         </div>
-        <div class="column is-one-quarter">
-          <div class="recor-highlight">
-            <p class="recor-highlight-title">Total Turns</p>
-            <p class="recor-highlight-value">2,971</p>
-            <p class="recor-highlight-meta">Avg 4.2 turns/conversation</p>
+        <div class="columns is-multiline">
+          <div class="column is-one-third">
+            <div class="recor-card">
+              <h3 class="title is-5">What Makes RECOR Different</h3>
+              <h4 class="title is-6">Reasoning-Intensive Retrieval</h4>
+              <p>
+                Queries require understanding the logical flow of conversation, building reasoning chains,
+                and synthesizing evidence across multiple turns.
+              </p>
+            </div>
+          </div>
+          <div class="column is-one-third">
+            <div class="recor-card">
+              <h3 class="title is-5">Decomposition Framework</h3>
+              <p>
+                Each conversation is generated through a Decomposition-and-Verification framework with
+                step-wise reasoning metadata for fine-grained evaluation.
+              </p>
+            </div>
+          </div>
+          <div class="column is-one-third">
+            <div class="recor-card">
+              <h3 class="title is-5">Rich Annotations</h3>
+              <p>
+                Each turn includes target information, relevance signals, and irrelevance signals
+                to enable detailed analysis of retrieval behavior.
+              </p>
+            </div>
           </div>
         </div>
-        <div class="column is-one-quarter">
-          <div class="recor-highlight">
-            <p class="recor-highlight-title">Domains</p>
-            <p class="recor-highlight-value">11</p>
-            <p class="recor-highlight-meta">BRIGHT + StackExchange</p>
-          </div>
-        </div>
-        <div class="column is-one-quarter">
-          <div class="recor-highlight">
-            <p class="recor-highlight-title">Documents</p>
-            <p class="recor-highlight-value">507K</p>
-            <p class="recor-highlight-meta">174:1 neg-to-pos ratio</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
 
-  <section class="section" id="resources" style="background-color: #f5f5f5;">
-    <div class="container is-max-desktop">
-      <h2 class="title is-3">Resources</h2>
-      <div class="columns is-centered">
-        <div class="column is-two-thirds">
-          <div class="content">
-            <p>
-              Code, data, and evaluation scripts are available below.
-            </p>
-          </div>
-          <div class="buttons is-centered">
-            <a class="button is-dark is-rounded" href="https://github.com/RECOR-Benchmark/RECOR">
-              <span class="icon"><i class="fab fa-github"></i></span>
-              <span>GitHub</span>
-            </a>
-            <a class="button is-dark is-rounded" href="https://huggingface.co/datasets/RECOR-Benchmark/RECOR">
-              <span class="icon"><i class="fas fa-database"></i></span>
-              <span>Hugging Face</span>
-            </a>
-            <a class="button is-dark is-rounded" href="https://arxiv.org/abs/2601.05461">
-              <span class="icon"><i class="ai ai-arxiv"></i></span>
-              <span>arXiv</span>
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="section" id="citation">
-    <div class="container is-max-desktop">
-      <h2 class="title is-3">Citation</h2>
-      <div class="content">
-        <pre><code>@article{recor2025,
-  title={RECOR: Reasoning-focused Multi-turn Conversational Retrieval Benchmark},
-  author={Anonymous},
-  journal={Under Review},
-  year={2025}
-}</code></pre>
-      </div>
-    </div>
-  </section>
-
-  <footer class="footer">
-    <div class="container">
-      <div class="content has-text-centered">
-        <a class="icon-link" href="https://github.com/RECOR-Benchmark/RECOR">
-          <i class="fab fa-github"></i>
-        </a>
-        <a class="icon-link" href="https://huggingface.co/datasets/RECOR-Benchmark/RECOR">
-          <i class="fas fa-database"></i>
-        </a>
-        <a class="icon-link" href="https://arxiv.org/abs/2601.05461">
-          <i class="ai ai-arxiv"></i>
-        </a>
-      </div>
-      <div class="columns is-centered">
-        <div class="column is-8">
-          <div class="content has-text-centered">
-            <p>
-              This website is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative
-                Commons Attribution-ShareAlike 4.0 International License</a>.
+        <div class="columns is-centered" style="margin-top: 2rem;">
+          <div class="column is-full-width">
+            <h3 class="title is-4">Domains</h3>
+            <p class="content">
+              <strong>BRIGHT:</strong> Biology, Earth Science, Economics, Psychology, Robotics, Sustainable Living<br>
+              <strong>StackExchange:</strong> Drones, Hardware, Law, Medical Sciences, Politics
             </p>
           </div>
         </div>
       </div>
-    </div>
-  </footer>
+    </section>
 
-  <script>
-    // Tab switching functionality
-    document.querySelectorAll('.tabs li').forEach(tab => {
-      tab.addEventListener('click', () => {
-        const parent = tab.closest('.infoBody');
-        parent.querySelectorAll('.tabs li').forEach(t => t.classList.remove('is-active'));
-        tab.classList.add('is-active');
+    <section class="section">
+      <div class="container is-max-desktop">
+        <h2 class="title is-3">Key Findings</h2>
+        <div class="columns">
+          <div class="column">
+            <div class="recor-callout">
+              <h3 class="title is-5">Reasoning Context Doubles Performance</h3>
+              <p>
+                Combining conversation history with reasoning doubles retrieval performance
+                (Baseline .236 → History+Reasoning .479 nDCG@10, +103% improvement).
+              </p>
+            </div>
+          </div>
+          <div class="column">
+            <div class="recor-callout">
+              <h3 class="title is-5">Reasoning-Specialized Models Excel</h3>
+              <p>
+                DIVER achieves .584 nDCG@10, substantially outperforming dense encoders like SFR (.464).
+                Reasoning-enhanced approaches show consistent improvements across all 11 domains.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="columns" style="margin-top: 1rem;">
+          <div class="column">
+            <div class="recor-callout">
+              <h3 class="title is-5">Turn Position Effects</h3>
+              <p>
+                Baseline performance drops 31% from Turn 1 (.324) to Turn 2 (.224). History+Reasoning
+                shows improvement across turns, reaching .532 by Turn 4.
+              </p>
+            </div>
+          </div>
+          <div class="column">
+            <div class="recor-callout">
+              <h3 class="title is-5">Small Models Competitive in RAG</h3>
+              <p>
+                7-8B parameter models score only 5-7 points below 70B+ models when provided
+                with retrieved passages. Moderate correlation (r=.42) between retrieval and generation.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-        const tabName = tab.dataset.tab;
-        parent.querySelectorAll('.tab-content').forEach(content => {
-          content.style.display = 'none';
-        });
-        document.getElementById(tabName + '-content').style.display = 'block';
-      });
-    });
+    <section class="section" id="statistics" style="background-color: #f5f5f5;">
+      <div class="container is-max-desktop">
+        <h2 class="title is-3">Benchmark Statistics</h2>
+        <div class="columns is-multiline">
+          <div class="column is-one-quarter">
+            <div class="recor-highlight">
+              <p class="recor-highlight-title">Conversations</p>
+              <p class="recor-highlight-value">707</p>
+              <p class="recor-highlight-meta">Multi-turn dialogues</p>
+            </div>
+          </div>
+          <div class="column is-one-quarter">
+            <div class="recor-highlight">
+              <p class="recor-highlight-title">Total Turns</p>
+              <p class="recor-highlight-value">2,971</p>
+              <p class="recor-highlight-meta">Avg 4.2 turns/conversation</p>
+            </div>
+          </div>
+          <div class="column is-one-quarter">
+            <div class="recor-highlight">
+              <p class="recor-highlight-title">Domains</p>
+              <p class="recor-highlight-value">11</p>
+              <p class="recor-highlight-meta">BRIGHT + StackExchange</p>
+            </div>
+          </div>
+          <div class="column is-one-quarter">
+            <div class="recor-highlight">
+              <p class="recor-highlight-title">Documents</p>
+              <p class="recor-highlight-value">507K</p>
+              <p class="recor-highlight-meta">174:1 neg-to-pos ratio</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-    // Navbar burger menu
-    document.addEventListener('DOMContentLoaded', () => {
-      const $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
-      if ($navbarBurgers.length > 0) {
-        $navbarBurgers.forEach(el => {
-          el.addEventListener('click', () => {
-            const target = el.dataset.target;
-            const $target = document.getElementById(target);
-            el.classList.toggle('is-active');
-            $target.classList.toggle('is-active');
+    <section class="section" id="resources" style="background-color: #f5f5f5;">
+      <div class="container is-max-desktop">
+        <h2 class="title is-3">Resources</h2>
+        <div class="columns is-centered">
+          <div class="column is-two-thirds">
+            <div class="content">
+              <p>
+                Code, data, and evaluation scripts are available below.
+              </p>
+            </div>
+            <div class="buttons is-centered">
+              <a class="button is-dark is-rounded" href="https://github.com/RECOR-Benchmark/RECOR">
+                <span class="icon"><i class="fab fa-github"></i></span>
+                <span>GitHub</span>
+              </a>
+              <a class="button is-dark is-rounded" href="https://huggingface.co/datasets/RECOR-Benchmark/RECOR">
+                <span class="icon"><i class="fas fa-database"></i></span>
+                <span>Hugging Face</span>
+              </a>
+              <a class="button is-dark is-rounded" href="https://arxiv.org/abs/2601.05461">
+                <span class="icon"><i class="ai ai-arxiv"></i></span>
+                <span>arXiv</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <div class="container">
+        <div class="content has-text-centered">
+          <a class="icon-link" href="https://github.com/RECOR-Benchmark/RECOR">
+            <i class="fab fa-github"></i>
+          </a>
+          <a class="icon-link" href="https://huggingface.co/datasets/RECOR-Benchmark/RECOR">
+            <i class="fas fa-database"></i>
+          </a>
+          <a class="icon-link" href="https://arxiv.org/abs/2601.05461">
+            <i class="ai ai-arxiv"></i>
+          </a>
+        </div>
+        <div class="columns is-centered">
+          <div class="column is-8">
+            <div class="content has-text-centered">
+              <p>
+                This website is licensed under a <a rel="license"
+  href="http://creativecommons.org/licenses/by-sa/4.0/">Creative
+                  Commons Attribution-ShareAlike 4.0 International License</a>.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      // Tab switching functionality
+      document.querySelectorAll('.tabs li').forEach(tab => {
+        tab.addEventListener('click', () => {
+          const parent = tab.closest('.infoBody');
+          parent.querySelectorAll('.tabs li').forEach(t => t.classList.remove('is-active'));
+          tab.classList.add('is-active');
+
+          const tabName = tab.dataset.tab;
+          parent.querySelectorAll('.tab-content').forEach(content => {
+            content.style.display = 'none';
           });
+          document.getElementById(tabName + '-content').style.display = 'block';
         });
-      }
-    });
-  </script>
+      });
 
-</body>
-</html>
+      // Navbar burger menu
+      document.addEventListener('DOMContentLoaded', () => {
+        const $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+        if ($navbarBurgers.length > 0) {
+          $navbarBurgers.forEach(el => {
+            el.addEventListener('click', () => {
+              const target = el.dataset.target;
+              const $target = document.getElementById(target);
+              el.classList.toggle('is-active');
+              $target.classList.toggle('is-active');
+            });
+          });
+        }
+      });
+    </script>
+
+  </body>
+  </html>
